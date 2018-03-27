@@ -1,0 +1,11 @@
+########### New Projects / Cool stuff to try ############
+Botkit
+IBM Watson
+
+
+########## New scripts/sample codes to develop ##########
+Parsing a HTTP POST dumped on Hookbin/requestbin .. etc.
+
+
+
+
