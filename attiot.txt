@@ -11,8 +11,6 @@ everything seems to work.. but the data is not transmitted/updated on https://m2
 https://marketplace.att.com/quickstart
 # To activate/deactivate sim : https://marketplace.att.com/app/dashboard
 
-
-
 # MBED :
 https://os.mbed.com/compiler/#nav:/Avnet_ATT_Cellular_IOT/sensors.cpp;
 
@@ -34,4 +32,9 @@ https://simcontrolcenter.wireless.att.com/provision/ui/terminals/sims/simDetails
 
 # Register device on control center (get ICCI, authorization)
 https://simcontrolcenter.wireless.att.com/provision/ui/help/help.html
+
+# Use hookbin to post the trigger data
+https://hookbin.com/
+
+
 
