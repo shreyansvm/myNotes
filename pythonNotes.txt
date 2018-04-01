@@ -1,0 +1,11 @@
+# Good resource on Python Class
+http://python-textbok.readthedocs.io/en/1.0/Classes.html
+
+# Python Logging
+https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
+
+
+# -----------------------  TODO --------------------------------
+Use of Class decorators : @classmethod, @staticmethod
+
+
