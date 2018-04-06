@@ -1,0 +1,55 @@
+#### Python interpreter that works for parseCoinMarketCap.py
+/usr/local/Cellar/python/2.7.14_2/Frameworks/Python.framework/Versions/2.7/bin/python2.7 /Users/BytePython/PycharmProjects/WebHacks/webHacks/parseCoinMarketCap.py
+/usr/local/opt/python/bin/python2.7
+
+
+#### GIT user guide
+https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+
+# Setting up respository
+https://www.atlassian.com/git/tutorials/setting-up-a-repository
+
+# GIT tutorials
+https://www.atlassian.com/git/tutorials/using-branches
+
+# to create a github repository using commandline
+curl -u "$username:$token" https://api.github.com/user/repos -d '{"name":"'$repo_name'"}'
+
+# cloning an existing repository
+git clone https://github.com/shreyansvm/webHacks.git
+
+### adding a new file to existing repository
+# for the folder
+git init
+git add <filename>
+git commit -m "comment for this commit"
+git push
+
+# to sync or update local repo
+git pull
+
+# Checking status
+git status
+
+# checking commit logs
+git log
+git log --stat
+
+# Forking (from the repo page) and then cloning it. And creating upstream setting that enables all commits to go in original repo. 
+# Example -
+cd FirstNet/
+git clone https://github.com/shreyansvm/BuZZa
+git remote -v
+cd ..
+ls
+cd FirstNet/
+ls
+cd BuZZa/
+git remote -v
+git remote add upstream https://github.com/TimothyLe/BuZZa
+git remote -v
+# this will push to origin (your copy/forked of the shared repo)
+git push
+# psuh to upstream :
+git push push upstream master
+
