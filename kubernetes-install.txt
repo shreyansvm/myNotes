@@ -1,0 +1,26 @@
+#########################################################
+    Kubernetes (Minikube) install on MAC OS
+    https://kubernetes.io/docs/tasks/tools/install-minikube/
+#########################################################
+
+  501  sysctl -a | grep -E --color 'machdep.cpu.features|VMX'
+  502  pwd
+  503  ls
+  504  brew install kubectl
+
+  506  kubectl version --client
+
+  # make sure virtualbox is installed
+
+  508  brew install minikube
+  509  minikube version
+
+  514  minikube status
+
+
+  515  minikube start --driver=virtualbox
+  516  minikube status
+  
+  518  kubectl get pods
+  519  kubectl get nodes
+  
