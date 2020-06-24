@@ -106,3 +106,165 @@ Flags:
 Use "kubectl-kudo [command] --help" for more information about a command.
 shreyanss-mbp:$
   
+#####################################
+	How to Create an Operator from Scratch
+	https://kudo.dev/docs/runbooks/admin/create-operator.html#preconditions
+#####################################
+
+kudo BytePython$ mkdir first-operator
+kudo BytePython$ cd first-operator/
+first-operator BytePython$ 
+
+shreyanss-mbp:~ $ kubectl-kudo package new first-operator
+
+tree
+.
+└── operator
+    ├── operator.yaml
+    └── params.yaml
+
+1 directory, 2 files
+
+shreyanss-mbp:~ $ kubectl-kudo package add task
+Task Name: myapp
+Task Resource: deployment
+✔ Task Resource: deployment
+✗ Add another Resource: 
+
+shreyanss-mbp:~ $ kubectl-kudo package add plan
+Plan Name: deploy
+✔ serial
+Phase 1 name: main
+✔ parallel
+Step 1 name: everything
+✔ myapp
+✗ Add another Task: 
+✗ Add another Step: 
+✗ Add another Phase: 
+ 
+
+shreyanss-mbp:~ $ kubectl-kudo package add parameter
+Parameter Name: replicas
+Default Value: 3
+Display Name: 
+Description: number of app replicas
+✔ false
+✗ Add Trigger Plan: 
+shreyanss-mbp:first-operator BytePython$
+
+
+shreyanss-mbp:~ $ cat << EOF > operator/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: {{ .Params.replicas }}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+            - containerPort: 80
+EOF
+$ 
+
+
+################################
+ How to package a KUDO operator
+ https://kudo.dev/docs/runbooks/admin/create-kudo-package.html#steps
+################################
+
+In order to distribute a KUDO operator the files are packaged together in a compressed tarball. The KUDO CLI provides a mechanism to create this package format while verifying the integrity of the operator.
+
+
+shreyanss-mbp:~ $ mkdir ~/kudo/repo
+
+# Note: added 'kubernetesVersion: 1.10.11' to the ~/kudo/first-operator/operator/operator.yaml to tackle this issue:
+	Errors                                            
+	"kubernetesVersion" is required and must be semver
+	Error: found 1 package verification errors
+
+shreyanss-mbp:~ $ kubectl-kudo package create first-operator/operator/ --destination=~/kudo/repo/
+package is valid
+Package created: /Users/BytePython/kudo/repo/first-operator-0.1.0.tgz
+shreyanss-mbp:kudo BytePython$ ls ~/kudo/repo/
+first-operator-0.1.0.tgz
+$
+
+shreyanss-mbp:~ $ ls ~/kudo/repo
+first-operator-0.1.0.tgz
+
+
+
+	shreyanss-mbp:kudo BytePython$ kubectl get all --all-namespaces
+	NAMESPACE      NAME                                          READY     STATUS    RESTARTS   AGE
+	cert-manager   pod/cert-manager-7747db9d88-gxpl6             1/1       Running   0          47m
+	cert-manager   pod/cert-manager-cainjector-87c85c6ff-t7nv7   1/1       Running   0          47m
+	cert-manager   pod/cert-manager-webhook-64dc9fff44-7m5ks     1/1       Running   0          47m
+	kube-system    pod/coredns-66bff467f8-m4xhj                  1/1       Running   0          3d
+	kube-system    pod/coredns-66bff467f8-vf5lm                  1/1       Running   0          3d
+	kube-system    pod/etcd-minikube                             1/1       Running   0          3d
+	kube-system    pod/kube-apiserver-minikube                   1/1       Running   0          3d
+	kube-system    pod/kube-controller-manager-minikube          1/1       Running   0          3d
+	kube-system    pod/kube-proxy-sjbwb                          1/1       Running   0          3d
+	kube-system    pod/kube-scheduler-minikube                   1/1       Running   0          3d
+	kube-system    pod/storage-provisioner                       1/1       Running   0          3d
+	kudo-system    pod/kudo-controller-manager-0                 1/1       Running   0          46m
+
+	NAMESPACE      NAME                                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+	cert-manager   service/cert-manager                      ClusterIP   10.106.230.229   <none>        9402/TCP                 47m
+	cert-manager   service/cert-manager-webhook              ClusterIP   10.96.95.182     <none>        443/TCP                  47m
+	default        service/kubernetes                        ClusterIP   10.96.0.1        <none>        443/TCP                  3d
+	kube-system    service/kube-dns                          ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP   3d
+	kudo-system    service/kudo-controller-manager-service   ClusterIP   10.111.185.173   <none>        443/TCP                  46m
+
+	NAMESPACE     NAME                        DESIRED   CURRENT   READY     UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+	kube-system   daemonset.apps/kube-proxy   1         1         1         1            1           kubernetes.io/os=linux   3d
+
+	NAMESPACE      NAME                                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+	cert-manager   deployment.apps/cert-manager              1         1         1            1           47m
+	cert-manager   deployment.apps/cert-manager-cainjector   1         1         1            1           47m
+	cert-manager   deployment.apps/cert-manager-webhook      1         1         1            1           47m
+	kube-system    deployment.apps/coredns                   2         2         2            2           3d
+
+	NAMESPACE      NAME                                                DESIRED   CURRENT   READY     AGE
+	cert-manager   replicaset.apps/cert-manager-7747db9d88             1         1         1         47m
+	cert-manager   replicaset.apps/cert-manager-cainjector-87c85c6ff   1         1         1         47m
+	cert-manager   replicaset.apps/cert-manager-webhook-64dc9fff44     1         1         1         47m
+	kube-system    replicaset.apps/coredns-66bff467f8                  2         2         2         3d
+
+	NAMESPACE     NAME                                       DESIRED   CURRENT   AGE
+	kudo-system   statefulset.apps/kudo-controller-manager   1         1         46m
+	shreyanss-mbp:kudo BytePython$ 
+
+####################################################
+	How to host an Operator in a local repository
+	https://kudo.dev/docs/runbooks/admin/local-repo.html#preconditions
+####################################################
+
+Build Local Index File
+	shreyanss-mbp:kudo BytePython$ kubectl-kudo repo index ~/kudo/repo/
+	index /Users/BytePython/kudo/repo/index.yaml created.
+
+	shreyanss-mbp:kudo BytePython$ cd repo
+	shreyanss-mbp:repo BytePython$ ls
+	first-operator-0.1.0.tgz	index.yaml
+	shreyanss-mbp:repo BytePython$
+
+Run Repository HTTP Server
+
+
+Add the local repository to KUDO client
+
+Set the local repository to default KUDO context
+
+Confirm KUDO context
+
