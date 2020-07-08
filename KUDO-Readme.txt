@@ -45,6 +45,42 @@
   ✅ installed kudo controller
   shreyanss-mbp:$
   
+	shreyanss-mbp:kudo BytePython$ kubectl get ns
+	NAME              STATUS   AGE
+	cert-manager      Active   14d
+	default           Active   18d
+	kube-node-lease   Active   18d
+	kube-public       Active   18d
+	kube-system       Active   18d
+	kudo-system       Active   14d   <<<<<<<
+	shreyanss-mbp:kudo BytePython$
+
+	shreyanss-mbp:kudo BytePython$ kubectl get crd
+	NAME                                  CREATED AT
+	certificaterequests.cert-manager.io   2020-06-23T23:25:19Z
+	certificates.cert-manager.io          2020-06-23T23:25:19Z
+	challenges.acme.cert-manager.io       2020-06-23T23:25:19Z
+	clusterissuers.cert-manager.io        2020-06-23T23:25:19Z
+	instances.kudo.dev                    2020-06-23T23:25:44Z
+	issuers.cert-manager.io               2020-06-23T23:25:19Z
+	myapp.example.nokia.com               2020-06-25T21:43:36Z
+	operators.kudo.dev                    2020-06-23T23:25:44Z <<<<<<<
+	operatorversions.kudo.dev             2020-06-23T23:25:44Z
+	orders.acme.cert-manager.io           2020-06-23T23:25:19Z
+	shreyanss-mbp:kudo BytePython$
+
+	shreyanss-mbp:kudo BytePython$ k get all --all-namespaces | grep kudo
+	kudo-system    pod/kudo-controller-manager-0                 1/1     Running   0          14d
+	kudo-system    service/kudo-controller-manager-service   ClusterIP   10.111.185.173   <none>        443/TCP                  14d
+	kudo-system   statefulset.apps/kudo-controller-manager   1/1     14d
+	shreyanss-mbp:kudo BytePython
+
+  	shreyanss-mbp:kudo BytePython$ kubectl get -n kudo-system pod
+	NAME                        READY   STATUS    RESTARTS   AGE
+	kudo-controller-manager-0   1/1     Running   0          14d
+	shreyanss-mbp:kudo BytePython$
+	
+
 #########################################################
    KUDO Help
    (on MAC..in this case)
@@ -260,11 +296,151 @@ Build Local Index File
 	shreyanss-mbp:repo BytePython$
 
 Run Repository HTTP Server
-
+	shreyanss-mbp:repo BytePython$ python3 -m http.server 3000
+	Serving HTTP on :: port 3000 (http://[::]:3000/) ...
+	::1 - - [25/Jun/2020 15:19:48] "GET /index.yaml HTTP/1.1" 200 -
+	::1 - - [25/Jun/2020 15:31:16] "GET /index.yaml HTTP/1.1" 200 -
 
 Add the local repository to KUDO client
+	shreyanss-mbp:kudo BytePython$ kubectl kudo repo add local http://localhost:3000
+	"local" has been added to your repositories
+	shreyanss-mbp:kudo BytePython$
 
 Set the local repository to default KUDO context
+	shreyanss-mbp:kudo BytePython$ kubectl kudo repo context local
 
-Confirm KUDO context
+Confirm KUDO context using repo list command
+Note: The * next to local indicates that it is the default context for the KUDO client.
+	shreyanss-mbp:kudo BytePython$ kubectl kudo repo list
+	NAME     	URL                                                  
+	community	https://kudo-repository.storage.googleapis.com/0.10.0
+	*local   	http://localhost:3000                                
+	shreyanss-mbp:kudo BytePython$
+	
+####################################################
+	Install the Operator
+####################################################
+	shreyanss-mbp:kudo BytePython$ pwd
+	/Users/BytePython/kudo
+	shreyanss-mbp:
+	
+	shreyanss-mbp:kudo BytePython$ tree
+	.
+	├── Notes\ -\ creating\ first-operator\ using\ KUDO.txt
+	├── first-operator
+	│   └── operator
+	│       ├── operator.yaml
+	│       ├── params.yaml
+	│       └── templates
+	│           └── deployment.yaml
+	└── repo
+	    ├── first-operator-0.1.0.tgz
+	    └── index.yaml
 
+	4 directories, 6 files
+	shreyanss-mbp:kudo BytePython$
+	
+	shreyanss-mbp:kudo BytePython$ cat first-operator/operator/params.yaml 
+	apiVersion: kudo.dev/v1beta1
+	parameters:
+	- default: "3"
+	  description: number of app replicas
+	  name: replicas
+	shreyanss-mbp:kudo BytePython$
+
+	shreyanss-mbp:kudo BytePython$ cat first-operator/operator/templates/deployment.yaml 
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: nginx-deployment
+	spec:
+	  selector:
+	    matchLabels:
+	      app: nginx
+	  replicas: {{ .Params.replicas }}
+	  template:
+	    metadata:
+	      labels:
+		app: nginx
+	    spec:
+	      containers:
+		- name: nginx
+		  image: nginx:1.7.9
+		  ports:
+		    - containerPort: 80
+	shreyanss-mbp:kudo BytePython$
+	
+  ###### Install:
+	shreyanss-mbp:kudo BytePython$ kubectl kudo install first-operator/operator
+	operator default/first-operator created
+	operatorversion default/first-operator-0.1.0 created
+	instance default/first-operator-instance created
+	shreyanss-mbp:kudo BytePython$
+	
+	shreyanss-mbp:kudo BytePython$ k kudo get instances
+	List of current installed instances in namespace "default":
+	.
+	└── first-operator-instance
+	shreyanss-mbp:kudo BytePython$
+	
+	shreyanss-mbp:kudo BytePython$ kubectl get all
+	NAME                                    READY   STATUS    RESTARTS   AGE
+	pod/nginx-deployment-75f56db4db-bw7ms   1/1     Running   0          13m
+	pod/nginx-deployment-75f56db4db-rjfss   1/1     Running   0          13m
+	pod/nginx-deployment-75f56db4db-zsprg   1/1     Running   0          13m
+
+	NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+	service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP          18d
+
+	NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+	deployment.apps/nginx-deployment   3/3     3            3           13m
+
+	NAME                                          DESIRED   CURRENT   READY   AGE
+	replicaset.apps/nginx-deployment-75f56db4db   3         3         3       13m
+	shreyanss-mbp:kudo BytePython$ 
+	
+
+####################################################
+	Uninstall the Operator
+####################################################
+	shreyanss-mbp:kudo BytePython$ k kudo get instances
+	List of current installed instances in namespace "default":
+	.
+	└── first-operator-instance
+	shreyanss-mbp:kudo BytePython$
+
+  ###### Uninstall:
+	shreyanss-mbp:kudo BytePython$ k kudo uninstall --instance first-operator-instance
+	instance.kudo.dev/v1beta1/first-operator-instance deleted
+
+	shreyanss-mbp:kudo BytePython$
+
+	shreyanss-mbp:kudo BytePython$ k get all
+	NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+	service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP          18d
+	shreyanss-mbp:kudo BytePython$
+
+
+####################################################
+	Uninstalling KUDO
+	https://kudo.dev/docs/runbooks/admin/remove-kudo.html#preconditions
+####################################################
+Note: 
+  Removing KUDO Removes all KUDO resources
+  The removal of KUDO from the cluster will remove all KUDO operators on the cluster and all deployments associated with those operators.
+
+	kubectl kudo init --dry-run --output yaml | kubectl delete -f -
+
+  ###### Sample output:
+	$ kubectl kudo init --dry-run --output yaml | kubectl delete -f -
+	customresourcedefinition.apiextensions.k8s.io "operators.kudo.dev" deleted
+	customresourcedefinition.apiextensions.k8s.io "operatorversions.kudo.dev" deleted
+	customresourcedefinition.apiextensions.k8s.io "instances.kudo.dev" deleted
+	namespace "kudo-system" deleted
+	serviceaccount "kudo-manager" deleted
+	clusterrolebinding.rbac.authorization.k8s.io "kudo-manager-rolebinding" deleted
+
+#############
+  Reference
+#############
+https://github.com/kudobuilder/kudo/issues/1557
