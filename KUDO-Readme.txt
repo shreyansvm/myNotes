@@ -443,4 +443,6 @@ Note:
 #############
   Reference
 #############
+https://kudo.dev/docs/
 https://github.com/kudobuilder/kudo/issues/1557
+https://www.cncf.io/wp-content/uploads/2019/10/KUDO-CNCF-Webinar.pdf
