@@ -1,0 +1,9 @@
+# Taking a backup of the ETCD cluster and saving it to /tmp/etcd-backup.db
+ETCDCTL_API=3 etcdctl --endpoints https://[127.0.0.1]:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key snapshot save /tmp/etcd-backup.db
+
+# Create a static pod
+### Create a static pod on node01 called nginx-critical with image nginx. Create this pod on node01 and make sure that it is recreated/restarted automatically in case of a failure
+
+
+
+
