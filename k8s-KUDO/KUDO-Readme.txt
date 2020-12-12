@@ -24,6 +24,57 @@
   518  kubectl get pods
   519  kubectl get nodes
   
+  
+#########################################################
+    Upgrade kubectl on MAC OS
+#########################################################
+  538  curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
+  539  chmod +x ./kubectl
+  540  sudo mv ./kubectl /usr/local/bin/kubectl
+  541  kubectl version
+
+#########################################################
+    Upgrade Minikube on MAC OS
+#########################################################
+  567  sudo rm -rf /usr/local/bin/minikube
+  568  brew update
+  577  sudo rm -rf ~/.minikube
+  578  brew install minikube
+  579  brew link minikube
+  580  brew install minikube
+  581  minikube get-k8s-versions
+  582  minikube version
+  583  minikube start
+  $ minikube start
+😄  minikube v1.15.1 on Darwin 11.0.1
+✨  Automatically selected the hyperkit driver
+💾  Downloading driver docker-machine-driver-hyperkit:
+    > docker-machine-driver-hyperkit.sha256: 65 B / 65 B [---] 100.00% ? p/s 0s
+    > docker-machine-driver-hyperkit: 11.44 MiB / 11.44 MiB  100.00% 7.87 MiB p
+🔑  The 'hyperkit' driver requires elevated permissions. The following commands will be executed:
+
+    $ sudo chown root:wheel /Users/xxxxx/.minikube/bin/docker-machine-driver-hyperkit
+    $ sudo chmod u+s /Users/xxxx/.minikube/bin/docker-machine-driver-hyperkit
+
+
+💿  Downloading VM boot image ...
+    > minikube-v1.15.0.iso.sha256: 65 B / 65 B [-------------] 100.00% ? p/s 0s
+    > minikube-v1.15.0.iso: 181.00 MiB / 181.00 MiB [ 100.00% 10.81 MiB p/s 17s
+👍  Starting control plane node minikube in cluster minikube
+💾  Downloading Kubernetes v1.19.4 preload ...
+    > preloaded-images-k8s-v6-v1.19.4-docker-overlay2-amd64.tar.lz4: 486.35 MiB
+🔥  Creating hyperkit VM (CPUs=2, Memory=4000MB, Disk=20000MB) ...
+🐳  Preparing Kubernetes v1.19.4 on Docker 19.03.13 ...
+🔎  Verifying Kubernetes components...
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+$
+
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"20", GitVersion:"v1.20.0", GitCommit:"af46c47ce925f4c4ad5cc8d1fca46c7b77d13b38", GitTreeState:"clean", BuildDate:"2020-12-08T17:59:43Z", GoVersion:"go1.15.5", Compiler:"gc", Platform:"darwin/amd64"}
+Server Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.4", GitCommit:"d360454c9bcd1634cf4cc52d1867af5491dc9c5f", GitTreeState:"clean", BuildDate:"2020-11-11T13:09:17Z", GoVersion:"go1.15.2", Compiler:"gc", Platform:"linux/amd64"}
+$
+  
 #########################################################
    KUDO installation
    (on MAC..in this case)
@@ -33,7 +84,9 @@
   brew install kudo-cli
   
   # Install a cert-manager
-  kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.1/cert-manager.yaml
+  # On Kubernetes version v1.16+
+  kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
+  
   
   # kubectl-kudo init
   shreyanss-mbp:kudo BytePython$ kubectl-kudo init
